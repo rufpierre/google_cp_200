@@ -1,0 +1,17 @@
+application: pru-gae-exercise
+version: 7
+runtime: python27
+api_version: 1
+threadsafe: true
+libraries:
+- name: MySQLdb
+  version: latest
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /.*
+  script: simplesql.application

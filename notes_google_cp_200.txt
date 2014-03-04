@@ -1,0 +1,387 @@
+dans la developper console, j'ai setté le billing account sur ma carte...
+
+
+Set Up Your Development Environment
+
+To practice the examples discussed in these tutorials, please ensure to install the following pieces of software.
+Install Eclipse IDE for Java EE Developers (Indigo):Eclipse Download Site
+Install Google Eclipse Plugin: Google Plugin instructions
+Create application for use during tutorials [i.e. -gae-exercise.appspot.com]
+With a Gmail account that is non-Google Apps (i.e. not Apps Business Edition) create the API console project with Cloud Storage and Billing enabled
+Complete Exercise #1
+wiki
+tutorial guide
+starting source code
+
+
+
+https://developers.google.com/appengine/docs/java/tools/eclipse#Getting_Eclipse
+
+
+
+Change the war/WEB-INF/appengine-web.xml file to use your own application ID (value before .appspot.com of your application) and save.
+
+Copiez ce code, puis collez-le dans votre application :
+4/fQaqr1HVqP8cx_LVPhABx8DOjf9h.IhxHhJ_y-NIVYKs_1NgQtmW_l-WfhwI
+
+Description	Resource	Path	Location	Type
+The project 'Geo-Training-Example1' does not have any App Engine SDKs on its build path	Geo-Training-Example1		Unknown	Google App Engine Problem
+
+
+
+liste des applis: google app engine > versions
+gestion des cles d'api (ex: maps): google api console > api access
+ouverture des services: google api console > services
+
+il y a 2 types de consoles:
+	- soit la console api (ancienne interface)
+	- soit la console cloud api (nouvelle interface) : https://cloud.google.com/console/project
+
+pour faire tourner, on peut soit:
+	lancer via la fleche verte classique -> serveur en local
+	lancer via le menu google 'deploy to app engine' pour aller direct sur l'appli
+
+important: si pb de compile, ne pas oulier d'aller dans le 'java build properties'du projet et et de cocher 'app engine' et 'jre' dans l'onglet 'order and export'
+
+
+google app engine > administration > application settings > Service Account Name ! pru-gae-exercise@appspot.gserviceaccount.com
+
+
+tutorial 1
+----------
+
+tutorial 2
+----------
+
+dans web.xml, si on passe de:
+	<url-pattern>/loginrequired/*</url-pattern>
+à:
+	<url-pattern>/*</url-pattern>
+on 'authorise que les urls qui sont deja loggués (comprend pas trop, mais bon...)
+
+pour enabler le storage:
+	google developper console > cloud storage > projet dashboard (on est dans console api) > enable (vérif qu'on est sur le bon projet)
+
+tutorial 3 - google maps
+------------------------
+
+activer service api maps 3 dans google console api > services
+créer une cle dans goole console api pour l'acces browser (j'ai limité au nom de domaine de mon appli par defaut -> donc pas possible en local)
+
+tutorial 4 - google cloud storage ('Backup and restore High Replication Datastore (HRD) data to Cloud Storage')
+---------------------------------------------------------------------------------------------------------------
+
+pour ajouter un membre dans le cloud storage, suivre : http://stackoverflow.com/questions/17534709/google-app-engine-authorization-for-google-bigquery
+==> différent du tuto qui nécéssite un mail de confirmation sur une adresse inexistante.
+
+en localhost, les files générés par l'app engine (comme les csv de data) sont dans: war/WEB-INF/appengine-generated/
+
+en écrivant un fichier csv, une fois sur l'app engine, c'est comme si c'était stocké dans le cloud (il apparait en local sous : war/WEB-INF/appengine-generated/)
+
+une fois déployée, aller dans la cloud console et dans 'storage browser', on verra le fichier csv créé
+
+tutorail 5 - Use Google Apps group membership for authorization
+---------------------------------------------------------------
+
+
+tutorial python
+===============
+
+pour lancer le serveur : /usr/local/bin/google_appengine/dev_appserver.py pyspace/guestbook/
+
+programme
+---------
+Setup Python Development Environment
+	[x] The Development Environment (Note: please use Python 2.7)
+	[x] Hello, World!
+
+Required Reading
+	[x] What Is Google App Engine?
+	[x] Introduction
+	[x] Explaining the webapp2 Framework
+	[x] Using the Users Service
+	[x] Handling Forms With webapp2
+	[ ] Using the Datastore
+	[ ] Using Templates
+	[ ] Using Static Files
+	[ ] Uploading Your Application
+
+
+Setup Python Development Environment
+------------------------------------
+j'ai installé les scripts google app engine dans /usr/local/bin
+j'ai mis mon "workspace" python dans /home/pierre/pyspace
+
+il y a 2 scripts principaux
+	* dev_appserver.py repertoire_du_projet -> pour lancer le serveur en local
+	* appcfg.py -> pour uploader l'appli sur l'app-engine
+
+pour rjaouter des libraires, les mettre dans le source code bien sur, mais aussi dans l'app.yaml
+
+
+what is google app engine?
+--------------------------
+
+storing your data
+	The (app engine) Datastore -> nosql
+	google cloud sql -> rdbms basé sur mysql
+	google cloud storage -> stockage objets et fichier (jusqu'au tera)
+
+datastore
+	transaction
+google accounts -> pas beosin gerer comptes
+app engine services
+	url fetch
+	mail
+	memcache
+	image manipulation
+scheduled task and task queues
+
+administration console -> manage applications running on google app engine
+
+dans le rep de l'appli, créer un fichier app.yaml, où l'onrenseigne le nom de l'appli (nom du fichier principal sans l'extension .py)
+
+using the Users service
+-----------------------
+en local on peut utiliser n'importe quel user, même inexistant. Cela n'a pas d'importance.
+
+using the datastore
+-------------------
+on stocke les objets sous forme d'entities, qui ont une key unique.
+une entity peut en designer une autre comme son parent (idem filesystem)
+si entity du même ancetre => même entity group, qu'on peut recup avec la cle du parent
+req sur plusieurs groupes pas forcement consistentes, mais sur un seul groupe, consistentes
+req sur un seul groupe d'entites -> ancestor query
+
+lire Structuring data for strong consistency : https://developers.google.com/appengine/docs/python/datastore/structuring_for_strong_consistency
+
+j'avais un problème sur ma clause ".order(-Greeting.content)". En la supprimant, les posts s'affichient, mais en la gardant, il n'apparaissent pas, et ce sans message d'erreur.
+	en fait dans la declaration du modele, on met: 	content = ndb.StringProperty(indexed=False)
+	donc si on fait un order p/r un champ qui n'est pas indexé, ça ne retourne rien, mais SANS message d'erreur.
+
+question: comment fait-on pour voir le contenu du datastore en local?
+
+on utilise une entite Guestbook pour être parent des Greetings. Pas besoin d'instancier Guestbook, seul un appel de type: ndb.Key('Guestbook', 'default_guestbook_name') est necessaire pour l'identifier.
+
+greeting.put est utilisé pour créer ou updater l'entité concernée.
+
+si on stocke sur le meme entity group (par l'id du parent), alors on ne peut faire qu'une ecriture par seconde. (memcache peut empecher le fait qu'on ne voie pas intantannément le post si on submit dut plusieurs entity groups)
+
+"Indexes are tables that map ordered property values to entity keys."
+
+certaines requetes peuvent être faites à partir d'indexes automatiques. Mais certaines vont necessiter des 'custom indexes'. Ces derniers sont mis à jour automatiquement quand l'appli est mise à jour.
+
+
+Using templates
+---------------
+
+--
+
+Using static files
+------------------
+
+pour rajouter un repertoire de fichiers static, ajouter dans app.yaml:
+	handlers:
+	- url: /stylesheets
+	  static_dir: stylesheets
+	- url: /.*
+	  script: mine_templates_v1.application
+
+les patterns de handler sont executés dans l'ordre dans lequel ils sont listés. Il est donc important de faire attention à cet ordre.
+
+
+tutorial Big Query
+==================
+
+BigQuery browser tool
+---------------------
+on peut être ajouté dans le partage d'un sataset, mais pas dans le partage de son projet correspondant. Dans ce cas, le dataset n'apparait pas, et il faut l'ajouter à la main avec l'option 'display projects'. On peut rechercher un projet en faisant 'fleche-> switch project -> display project'
+
+### Switch Projects
+
+### Create and Populate a Table
+
+### Copy an Existing Table
+
+### Append Data to a Table
+It is not possible to append data to a table through the browser tool, but you can append data to a table using the API by setting the writeDisposition of your job to WRITE_APPEND. For more information, review the API reference for your desired job.
+
+### Run a Query
+You can create queries that access multiple datasets or projects by qualifying the table names using the syntax projectId:datasetId.tableId.
+
+### Downloading, Saving, and Exporting Data
+pour exporter une table dans un bucket:
+	aller dans mon cloud storage. Par exemple on a le bucket avec ce chemin : Home/prugeodsbackup/
+	donc dans l'export (accéssible par menu de la table), si on veut créer un fichier test dans ce buckect, alors on rentre l'adresse: gs://prugeodsbackup/test
+
+en cours:
+	on peut faire le tuto soit depuis le tuto, soit depuis la page de sign up. En gros: browser tool, bq cli tool, 
+	en cours: en cours: bq tool
+
+bq shell
+--------
+
+### pour lancer sur un projet (obligatoire)
+lancer avec un projet par défaut, car sinon je ne sais pas comment le spécifier ensuite
+bq shell --projet_id pru-gae-exercise
+c'est important de designer un projet, même pour travailler sur des données sur d'autres datasets (comme les ds publics par exemple)
+
+### aide
+bq --help
+http://stackoverflow.com/questions/13254479/how-do-i-configure-google-bigquery-command-line-tool-to-use-a-service-account
+
+### conf par défaut
+à priori dans ~/.bigqueryrc (qui doit se créer au premier lancement), mais pas trouvé
+
+### ex de requetes
+ select * from publicdata:samples.shakespeare where word contains 'raisin'
+ select * from publicdata:samples.shakespeare where word='huzzah' INGNORE CASE
+
+ls pour lister les dataset sous un projet
+ou 'ls id_projet'
+ls -p pour voir les projets
+
+mk nom_dataset pour creer un dataset
+
+### uploader une table à partir d'un fichier csv
+uploader le fichier dans un bucket
+puis lancer la ligende commande:
+	load tuto.names2010 gs://prugeodsbackup/yob2010.txt name:string,gender:string,count:integer
+
+ls -> montre les datasets
+ls tuto -> montre les table du ds tuto
+
+pour voir le debut de la table chargée:
+	head tuto.names2010
+
+détails sur la table : show tuto.names2010
+
+si data en iso au lieu de utf-8, alors utiliser:
+	bq load -E ISO-8859-1 mydataset.names2010 gs://bigquerybucket/yob2010.txt name:string,gender:string,count:integer
+
+### exemples de requêtes sur la table
+select * from tuto.names2010 where gender='F' order by count desc limit 5
+
+### référence sur les regexp
+http://code.google.com/p/re2/wiki/Syntax
+
+
+Big Query Basics Exercise
+-------------------------
+
+313797035
+
+Who are 10 top contributors?
+SELECT SUM(num_characters) AS total_characters, contributor_username FROM [publicdata:samples.wikipedia] GROUP BY contributor_username ORDER BY total_characters DESC LIMIT 10
+
++------------------+------------------------+
+| total_characters |  contributor_username  |
++------------------+------------------------+
+|    1317065197791 | NULL                   |
+|     139345275467 | WP 1.0 bot             |
+|      33394573039 | COIBot                 |
+|      26602874143 | SineBot                |
+|      21160777096 | SmackBot               |
+|      16372276782 | ClueBot                |
+|      15924120393 | Mathbot                |
+|      14138414203 | AlexNewArtBot          |
+|      11664807995 | BetacommandBot         |
+|      10255077263 | HBC Archive Indexerbot |
++------------------+------------------------+
+
+### Importing Data Exercise
+direct depuis local:
+load tuto.namesbystate /home/pierre/Downloads/namesbystate.csv state,sex,year:integer,name,occurence:integer
+
+ou en important d'abord dans cloud storage:
+Upload from Cloud Storage
+$ gsutil cp ./namesbystate.csv gs:///
+$ bq load .gs:///namesbystate.csv \ state,sex,year:integer,name,occurrence:integer
+
+select name, year, sum(occurence) as occ from tuto.namesbystate where year=2000 group by name, year order by occ desc limit 30
+
+SELECT name, year, sum(occurrence) as count FROM [.] GROUP BY name, year having year = 2000 order by count desc limit 100
+
+having year = 2000 peut se substituer à une clause 'where'
+
+
+Google Cloud SQL
+================
+
+à peu près équiv à mysql
+
+Introduction
+------------
+
+### You can connect to a Google Cloud SQL instance from:
+MySQL Client
+Third-party tools like SQL Workbench or Toad for MySQL
+External applications using standard MySQL database drivers
+App Engine Java applications
+App Engine Python applications
+Google Apps Script scripts
+
+Getting Started
+---------------
+### Creating a Google Cloud SQL instance
+aller dans dev console>cloud sql>créer une instance
+
+
+### Configuring a Google Cloud SQL instance
+#### Configuring Access
+dans l'instance>access control
+pour spécifier son ip: ifconfig (ipconfig sous windows) ou internet what's my ip?
+192.168.0.41
+puis 'add authorise network'
+
+
+#### Setting a Root Password
+pour l'instance tuto: pierre
+
+	Creating, Editing, Deleting, and Restarting Instances
+#### Configuring SSL for an Instance
+à faire absoluement si base de prod
+
+	Viewing Information about an Instance
+	Importing and Exporting Data
+	Scheduling and Restoring Backups
+
+### pour se connecter
+> mysql --host=173.194.83.121 --user=root --password
+
+### dans mysql
+> show databases;
+
+### pour se connecter à une db locale
+source /home/pierre/tempo/schema_and_data.sql
+select * from stars
+
+google app engine
+-----------------
+installer mysqlbd sous python:
+sudo apt-get install build-essential python-dev libmysqlclient-dev
+http://mysql-python.blogspot.fr/2012/11/is-mysqldb-hard-to-install.html
+--> pas marché, peut-être que installé sur python 2.6 et pas 2.7
+
+sudo apt-get install python2.7-mysqldb
+http://stackoverflow.com/questions/10062002/mysqldb-for-python-2-7-ubuntu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

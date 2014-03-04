@@ -1,0 +1,15 @@
+application: pru-gae-exercise
+version: 6
+runtime: python27
+api_version: 1
+threadsafe: true
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+- url: /.*
+  script: mine_templates_v1.application
